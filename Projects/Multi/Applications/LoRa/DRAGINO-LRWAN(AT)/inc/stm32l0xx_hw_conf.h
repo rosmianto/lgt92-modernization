@@ -173,18 +173,18 @@ Maintainer: Miguel Luis and Gregory Cristian
 #define RCC_PERIPHCLK_I2Cx              RCC_PERIPHCLK_I2C1
 #define RCC_I2CxCLKSOURCE_SYSCLK        RCC_I2C1CLKSOURCE_SYSCLK
 #define I2Cx_CLK_ENABLE()               __HAL_RCC_I2C1_CLK_ENABLE()
-#define I2Cx_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE()
-#define I2Cx_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOB_CLK_ENABLE() 
+#define I2Cx_SDA_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define I2Cx_SCL_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
 
 #define I2Cx_FORCE_RESET()              __HAL_RCC_I2C1_FORCE_RESET()
 #define I2Cx_RELEASE_RESET()            __HAL_RCC_I2C1_RELEASE_RESET()
 
-/* Definition for I2Cx Pins */
+/* Definition for I2Cx Pins: PA9 = SCL, PA10 = SDA (AF4) */
 #define I2Cx_SCL_PIN                    GPIO_PIN_9
-#define I2Cx_SCL_GPIO_PORT              GPIOB
+#define I2Cx_SCL_GPIO_PORT              GPIOA
 #define I2Cx_SDA_PIN                    GPIO_PIN_10
-#define I2Cx_SDA_GPIO_PORT              GPIOB
-#define I2Cx_SCL_SDA_AF                 GPIO_AF1_I2C1
+#define I2Cx_SDA_GPIO_PORT              GPIOA
+#define I2Cx_SCL_SDA_AF                 GPIO_AF4_I2C1
 
 /* Definition for I2Cx's NVIC */
 #define I2Cx_IRQn                       I2C1_IRQn

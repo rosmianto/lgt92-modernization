@@ -51,46 +51,69 @@ uint8_t TF[2]={0x9F,0x07};
 
 uint8_t MPU_Init(void)
 {
-    uint8_t res=0;
-   
-    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X80);//reset MPU9250
-    DelayMs(100);  //ÑÓÊ±100ms
-    MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X00);//wake MPU9250
-    MPU_Set_Gyro_Fsr(3);					        	//Gyro sensor,¡À2000dps
-	  MPU_Set_Accel_Fsr(2);					       	 	//Acceleration gyro sensor,¡À8g
-    MPU_Set_Rate(200);						       	 	//Set sampling frequency 200Hz
-    MPU_Write_Byte(MPU9250_ADDR,MPU_INT_EN_REG,0X00);   //Close all interrupts	
-	
-	 MPU_Write_Byte(MPU9250_ADDR,MPU_USER_CTRL_REG,0X00);//I2C Main mode off
-	 MPU_Write_Byte(MPU9250_ADDR,MPU_FIFO_EN_REG,0X00);	// off FIFO
-	 MPU_Write_Byte(MPU9250_ADDR,MPU_INTBP_CFG_REG,0X00);//The INT pin is active low,the bypass mode is enabled,and the magnetometer can be read directly.
-   res=MPU_Read_Byte(MPU9250_ADDR,MPU_DEVICE_ID_REG);  //Read the ID of MPU9250
-    if(res==MPU6500_ID1||res==MPU6500_ID2) //Correct ID
-    {
-        MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X01);  	//Set CLKSEL,PLL, X axis as reference
-			DelayMs(50);
-        MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);  	//Acceleration and gyroscope work
-		MPU_Set_Rate(200);						       	//Set sampling frequency 200Hz   
-    }else return 1;
- 
-    res=MPU_Read_Byte(AK8963_ADDR,MAG_WIA);    			//Read the ID of AK8963  
-    if(res==AK8963_ID)
-    {
-        MPU_Write_Byte(AK8963_ADDR,MAG_CNTL2,0X01);		//Reset AK8963
-		DelayMs(50);
-        MPU_Write_Byte(AK8963_ADDR,MAG_CNTL1,0X11);		//Set AK8963 as a single measurement
-			
-    }else return 1;
-		
-    LPF2pSetCutoffFreq_1(IMU_SAMPLE_RATE,IMU_FILTER_CUTOFF_FREQ);		//30Hz
-    LPF2pSetCutoffFreq_2(IMU_SAMPLE_RATE,IMU_FILTER_CUTOFF_FREQ);
-    LPF2pSetCutoffFreq_3(IMU_SAMPLE_RATE,IMU_FILTER_CUTOFF_FREQ);
-    LPF2pSetCutoffFreq_4(IMU_SAMPLE_RATE,IMU_FILTER_CUTOFF_FREQ);
-    LPF2pSetCutoffFreq_5(IMU_SAMPLE_RATE,IMU_FILTER_CUTOFF_FREQ);
-    LPF2pSetCutoffFreq_6(IMU_SAMPLE_RATE,IMU_FILTER_CUTOFF_FREQ);
+    uint8_t res;
 
-//		calibrate();
-    return 0;
+    if (MPU_Write_Byte(MPU9250_ADDR, MPU_PWR_MGMT1_REG, 0x80U) != 0U)
+    {
+        return 1U;
+    }
+    DelayMs(100U);
+
+    if (MPU_Write_Byte(MPU9250_ADDR, MPU_PWR_MGMT1_REG, 0x00U) != 0U ||
+        MPU_Set_Gyro_Fsr(3U) != 0U ||
+        MPU_Set_Accel_Fsr(2U) != 0U ||
+        MPU_Set_Rate(200U) != 0U ||
+        MPU_Write_Byte(MPU9250_ADDR, MPU_INT_EN_REG, 0x00U) != 0U ||
+        MPU_Write_Byte(MPU9250_ADDR, MPU_USER_CTRL_REG, 0x00U) != 0U ||
+        MPU_Write_Byte(MPU9250_ADDR, MPU_FIFO_EN_REG, 0x00U) != 0U ||
+        MPU_Write_Byte(MPU9250_ADDR, MPU_INTBP_CFG_REG, 0x82U) != 0U)
+    {
+        return 1U;
+    }
+
+    res = MPU_Read_Byte(MPU9250_ADDR, MPU_DEVICE_ID_REG);
+    if ((res != MPU6500_ID1) && (res != MPU6500_ID2))
+    {
+        return 1U;
+    }
+
+    if (MPU_Write_Byte(MPU9250_ADDR, MPU_PWR_MGMT1_REG, 0x01U) != 0U)
+    {
+        return 1U;
+    }
+    DelayMs(50U);
+
+    if (MPU_Write_Byte(MPU9250_ADDR, MPU_PWR_MGMT2_REG, 0x00U) != 0U ||
+        MPU_Set_Rate(200U) != 0U)
+    {
+        return 1U;
+    }
+
+    res = MPU_Read_Byte(AK8963_ADDR, MAG_WIA);
+    if (res != AK8963_ID)
+    {
+        return 1U;
+    }
+
+    if (MPU_Write_Byte(AK8963_ADDR, MAG_CNTL2, 0x01U) != 0U)
+    {
+        return 1U;
+    }
+    DelayMs(50U);
+
+    if (MPU_Write_Byte(AK8963_ADDR, MAG_CNTL1, 0x11U) != 0U)
+    {
+        return 1U;
+    }
+
+    LPF2pSetCutoffFreq_1(IMU_SAMPLE_RATE, IMU_FILTER_CUTOFF_FREQ);
+    LPF2pSetCutoffFreq_2(IMU_SAMPLE_RATE, IMU_FILTER_CUTOFF_FREQ);
+    LPF2pSetCutoffFreq_3(IMU_SAMPLE_RATE, IMU_FILTER_CUTOFF_FREQ);
+    LPF2pSetCutoffFreq_4(IMU_SAMPLE_RATE, IMU_FILTER_CUTOFF_FREQ);
+    LPF2pSetCutoffFreq_5(IMU_SAMPLE_RATE, IMU_FILTER_CUTOFF_FREQ);
+    LPF2pSetCutoffFreq_6(IMU_SAMPLE_RATE, IMU_FILTER_CUTOFF_FREQ);
+
+    return 0U;
 }
 
 void MPU_INT_Init(void)
@@ -98,7 +121,7 @@ void MPU_INT_Init(void)
   MPU_Write_Byte(MPU9250_ADDR,0x6B,0X00);//wake
 //  MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X00);  	//Acceleration and gyroscope work
 	
-	MPU_Write_Byte(MPU9250_ADDR,MPU_INTBP_CFG_REG,0X00);
+	MPU_Write_Byte(MPU9250_ADDR,MPU_INTBP_CFG_REG,0X82);
 	MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT1_REG,0X00);
 	MPU_Write_Byte(MPU9250_ADDR,MPU_PWR_MGMT2_REG,0X07);
 	MPU_Write_Byte(MPU9250_ADDR,MPU_ACCEL_CFG2_REG,0X09);
@@ -128,20 +151,20 @@ void MPU_INT_Init(void)
 //	DelayMs(200);
 }
 //Set the MPU9250 gyro sensor full-scale range
-//fsr:0,¡À250dps;1,¡À500dps;2,¡À1000dps;3,¡À2000dps
+//fsr:0,ï¿½ï¿½250dps;1,ï¿½ï¿½500dps;2,ï¿½ï¿½1000dps;3,ï¿½ï¿½2000dps
 //Return value: 0,set successfully
 //          Other,setup failed
 uint8_t MPU_Set_Gyro_Fsr(uint8_t fsr)
 {
-	return MPU_Write_Byte(MPU9250_ADDR,MPU_GYRO_CFG_REG,(fsr<<3)|3);//ÉèÖÃÍÓÂÝÒÇÂúÁ¿³Ì·¶Î§  
+	return MPU_Write_Byte(MPU9250_ADDR,MPU_GYRO_CFG_REG,(fsr<<3)|3);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì·ï¿½Î§
 }
 //Set the MPU9250 accelerometer full-scale range
-//fsr:0,¡À2g;1,¡À4g;2,¡À8g;3,¡À16g
+//fsr:0,ï¿½ï¿½2g;1,ï¿½ï¿½4g;2,ï¿½ï¿½8g;3,ï¿½ï¿½16g
 //Return value: 0,set successfully
 //          Other,setup failed
 uint8_t MPU_Set_Accel_Fsr(uint8_t fsr)
 {
-	return MPU_Write_Byte(MPU9250_ADDR,MPU_ACCEL_CFG_REG,fsr<<3);//ÉèÖÃ¼ÓËÙ¶È´«¸ÐÆ÷ÂúÁ¿³Ì·¶Î§  
+	return MPU_Write_Byte(MPU9250_ADDR,MPU_ACCEL_CFG_REG,fsr<<3);//ï¿½ï¿½ï¿½Ã¼ï¿½ï¿½Ù¶È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì·ï¿½Î§
 }
 
 //Set the digital low-pass filter of the MPU9250
@@ -166,13 +189,26 @@ uint8_t MPU_Set_LPF(uint16_t lpf)
 //          Other,setup failed
 uint8_t MPU_Set_Rate(uint16_t rate)
 {
-	uint8_t data;
-	if(rate>1000)rate=1000;
-	if(rate<4)rate=4;
-	data=1000/rate-1;
-	data=MPU_Write_Byte(MPU9250_ADDR,MPU_SAMPLE_RATE_REG,data);	//Set the digital low-pass filter
- 	return MPU_Set_LPF(rate/2);	//Automatically set LPF to half of the sampling frequency
+    uint8_t data;
+
+    if (rate > 1000U)
+    {
+        rate = 1000U;
+    }
+    if (rate < 4U)
+    {
+        rate = 4U;
+    }
+
+    data = (uint8_t)((1000U / rate) - 1U);
+    if (MPU_Write_Byte(MPU9250_ADDR, MPU_SAMPLE_RATE_REG, data) != 0U)
+    {
+        return 1U;
+    }
+
+    return MPU_Set_LPF((uint16_t)(rate / 2U));
 }
+
 
 /*
 *@Function: compensate for gyroscope drift
@@ -392,8 +428,8 @@ uint8_t MPU_Get_Accel(short *iax,short *iay,short *iaz,float *ax,float *ay,float
 	}
 	return res;
 }
-//µÃµ½´ÅÁ¦¼ÆÖµ(Ô­Ê¼Öµ)£¬Æ½¾ùÂË²¨²¢µ÷Õû·½Î»
-//mx,my,mz:´ÅÁ¦¼Æx,y,zÖáµÄÔ­Ê¼¶ÁÊý(´ø·ûºÅ)
+//ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ(Ô­Ê¼Öµ)ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»
+//mx,my,mz:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½x,y,zï¿½ï¿½ï¿½Ô­Ê¼ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 //Get the acceleration value(original value),low pass filter and adjust acceleration orientation
 //mx,my,mz:Raw data of the acceleration X, Y, Z axis (with symbol)
 //Return value: 0,set successfully
@@ -416,12 +452,12 @@ uint8_t MPU_Get_Magnetometer(short *mx,short *my,short *mz)
 		magoldy=*my;
 		magoldz=*mz;
 	} 	 
-	MPU_Write_Byte(AK8963_ADDR,MAG_CNTL1,0X11); //AK8963Ã¿´Î¶ÁÍêÒÔºó¶¼ÐèÒªÖØÐÂÉèÖÃÎªµ¥´Î²âÁ¿Ä£Ê½
+	MPU_Write_Byte(AK8963_ADDR,MAG_CNTL1,0X11); //AK8963Ã¿ï¿½Î¶ï¿½ï¿½ï¿½ï¿½Ôºï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Î²ï¿½ï¿½ï¿½Ä£Ê½
     return res;
 }
 
 /*
-*@Function:£º»ñµÃ´ÅÁ¦¼ÆÊý¾Ý£¬µ¥Î»¸ßË¹£¬²¢¶Ô´ÅÁ¦¼Æ½øÐÐ²¹³¥
+*@Function:ï¿½ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½Î»ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½
 *
 *
 */
@@ -441,113 +477,38 @@ uint8_t MPU_Get_Mag(short *imx,short *imy,short *imz,float *mx,float *my,float *
 	return res;
 }
 
-//IICÁ¬ÐøÐ´
-//addr:Æ÷¼þµØÖ· 
-//reg:¼Ä´æÆ÷µØÖ·
-//len:Ð´Èë³¤¶È
-//buf:Êý¾ÝÇø
-//·µ»ØÖµ:0,Õý³£
-//    ÆäËû,´íÎó´úÂë
-uint8_t MPU_Write_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf)
+//IICï¿½ï¿½ï¿½ï¿½Ð´
+//addr:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+//reg:ï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·
+//len:Ð´ï¿½ë³¤ï¿½ï¿½
+//buf:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½Öµ:0,ï¿½ï¿½ï¿½ï¿½
+//    ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+uint8_t MPU_Write_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf)
 {
-    uint8_t i;
-    IIC_Start();
-     IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    if(IIC_WaitAck())          //µÈ´ýÓ¦´ð
-    {
-        IIC_Stop();
-        return 1;
-    }
-     IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    for(i=0;i<len;i++)
-    {
-         IIC_SendByte(buf[i]);  //·¢ËÍÊý¾Ý
-        if(IIC_WaitAck())      //µÈ´ýACK
-        {
-            IIC_Stop();
-            return 1;
-        }
-    }
-    IIC_Stop();
-    return 0;
-} 
-
-//IICÁ¬Ðø¶Á
-//addr:Æ÷¼þµØÖ·
-//reg:Òª¶ÁÈ¡µÄ¼Ä´æÆ÷µØÖ·
-//len:Òª¶ÁÈ¡µÄ³¤¶È
-//buf:¶ÁÈ¡µ½µÄÊý¾Ý´æ´¢Çø
-//·µ»ØÖµ:0,Õý³£
-//    ÆäËû,´íÎó´úÂë
-uint8_t MPU_Read_Len(uint8_t addr,uint8_t reg,uint8_t len,uint8_t *buf)
-{ 
-    IIC_Start();
-     IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    if(IIC_WaitAck())          //µÈ´ýÓ¦´ð
-    {
-        IIC_Stop();
-        return 1;
-    }
-     IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-	  IIC_Start();                
-     IIC_SendByte((addr<<1)|1); //·¢ËÍÆ÷¼þµØÖ·+¶ÁÃüÁî
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    while(len)
-    {
-        if(len==1)*buf=IIC_ReadByte(0);//¶ÁÊý¾Ý,·¢ËÍnACK 
-		else *buf=IIC_ReadByte(1);		//¶ÁÊý¾Ý,·¢ËÍACK  
-		len--;
-		buf++;  
-    }
-    IIC_Stop();                 //²úÉúÒ»¸öÍ£Ö¹Ìõ¼þ
-    return 0;       
+    return IIC_MemWrite(addr, reg, len, buf);
 }
 
-//IICÐ´Ò»¸ö×Ö½Ú 
-//devaddr:Æ÷¼þIICµØÖ·
-//reg:¼Ä´æÆ÷µØÖ·
-//data:Êý¾Ý
-//·µ»ØÖµ:0,Õý³£
-//    ÆäËû,´íÎó´úÂë
-uint8_t MPU_Write_Byte(uint8_t addr,uint8_t reg,uint8_t data)
+uint8_t MPU_Read_Len(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf)
 {
-    IIC_Start();
-    IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    if(IIC_WaitAck())          //µÈ´ýÓ¦´ð
-    {
-        IIC_Stop();
-        return 1;
-    }
-    IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    IIC_SendByte(data);        //·¢ËÍÊý¾Ý
-    if(IIC_WaitAck())          //µÈ´ýACK
-    {
-        IIC_Stop();
-        return 1;
-    }
-    IIC_Stop();
-    return 0;
+    return IIC_MemRead(addr, reg, len, buf);
 }
 
-//IIC¶ÁÒ»¸ö×Ö½Ú 
-//reg:¼Ä´æÆ÷µØÖ· 
-//·µ»ØÖµ:¶Áµ½µÄÊý¾Ý
-uint8_t MPU_Read_Byte(uint8_t addr,uint8_t reg)
+uint8_t MPU_Write_Byte(uint8_t addr, uint8_t reg, uint8_t data)
 {
-    uint8_t res;
-    IIC_Start();
-    IIC_SendByte((addr<<1)|0); //·¢ËÍÆ÷¼þµØÖ·+Ð´ÃüÁî
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    IIC_SendByte(reg);         //Ð´¼Ä´æÆ÷µØÖ·
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-	IIC_Start();                
-    IIC_SendByte((addr<<1)|1); //·¢ËÍÆ÷¼þµØÖ·+¶ÁÃüÁî
-    IIC_WaitAck();             //µÈ´ýÓ¦´ð
-    res=IIC_ReadByte(0);		//¶ÁÊý¾Ý,·¢ËÍnACK  
-    IIC_Stop();                 //²úÉúÒ»¸öÍ£Ö¹Ìõ¼þ
-    return res;  
+    return MPU_Write_Len(addr, reg, 1U, &data);
 }
+
+uint8_t MPU_Read_Byte(uint8_t addr, uint8_t reg)
+{
+    uint8_t value = 0xFFU;
+
+    if (MPU_Read_Len(addr, reg, 1U, &value) != 0U)
+    {
+        return 0xFFU;
+    }
+
+    return value;
+}
+
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
