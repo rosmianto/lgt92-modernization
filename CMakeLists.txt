@@ -134,3 +134,34 @@ add_custom_command(TARGET lgt92 POST_BUILD
     COMMENT "Generating Intel HEX image"
     VERBATIM
 )
+
+# This target reuses the application and LoRaWAN stack while replacing the
+# hardware radio implementation with a deterministic simulation stub.
+get_target_property(LGT92_RENODE_SOURCES lgt92 SOURCES)
+list(REMOVE_ITEM LGT92_RENODE_SOURCES
+    "${BSP_COMPONENTS_DIR}/sx1276/sx1276.c"
+    "${PROJECT_SOURCE_DIR}/Drivers/BSP/sx1276mb1las/sx1276mb1las.c"
+)
+add_executable(lgt92_renode EXCLUDE_FROM_ALL
+    ${LGT92_RENODE_SOURCES}
+    "${PROJECT_SOURCE_DIR}/renode/radio_mock.c"
+)
+
+get_target_property(LGT92_INCLUDE_DIRS lgt92 INCLUDE_DIRECTORIES)
+target_include_directories(lgt92_renode PRIVATE ${LGT92_INCLUDE_DIRS})
+get_target_property(LGT92_COMPILE_DEFINITIONS lgt92 COMPILE_DEFINITIONS)
+target_compile_definitions(lgt92_renode PRIVATE ${LGT92_COMPILE_DEFINITIONS} RENODE_SIMULATION)
+get_target_property(LGT92_LINK_OPTIONS lgt92 LINK_OPTIONS)
+list(REMOVE_ITEM LGT92_LINK_OPTIONS "-Wl,-Map=${CMAKE_BINARY_DIR}/lgt92.map")
+target_link_options(lgt92_renode PRIVATE
+    ${LGT92_LINK_OPTIONS}
+    "-Wl,-Map=${CMAKE_BINARY_DIR}/lgt92_renode.map"
+)
+get_target_property(LGT92_LINK_LIBRARIES lgt92 LINK_LIBRARIES)
+target_link_libraries(lgt92_renode PRIVATE ${LGT92_LINK_LIBRARIES})
+
+set_target_properties(lgt92_renode PROPERTIES
+    OUTPUT_NAME lgt92_renode
+    SUFFIX .elf
+    LINK_DEPENDS "${LINKER_SCRIPT}"
+)

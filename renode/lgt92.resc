@@ -1,0 +1,20 @@
+:name: LGT92 STM32L072
+:description: Runs the LGT92 firmware with Renode I2C sensor mocks and an LPUART1 analyzer.
+
+using sysbus
+$name?="lgt92-stm32l072"
+$bin?=@build/renode/lgt92_renode.elf
+
+mach create $name
+machine LoadPlatformDescription @renode/lgt92-stm32l072.repl
+include @renode/mpu9250.py
+
+showAnalyzer sysbus.lpuart1
+
+macro reset
+"""
+    sysbus LoadELF $bin
+"""
+
+runMacro $reset
+start

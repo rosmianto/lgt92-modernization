@@ -69,7 +69,7 @@ static void (*RxCpltCallback) (uint8_t *rxChar);
 void vcom_Init(  void (*TxCb)(void) )
 {
 
-  /*Record Tx complete for DMA*/
+  /* Record the transmit-complete callback. */
   TxCpltCallback=TxCb;
   /*## Configure the UART peripheral ######################################*/
   /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
@@ -97,7 +97,13 @@ void vcom_Init(  void (*TxCb)(void) )
 
 void vcom_Trace(  uint8_t *p_data, uint16_t size )
 {
-    HAL_UART_Transmit_DMA(&UartHandle,p_data, size);
+  if (HAL_UART_Transmit(&UartHandle, p_data, size, HAL_MAX_DELAY) == HAL_OK)
+  {
+    if (NULL != TxCpltCallback)
+    {
+      TxCpltCallback();
+    }
+  }
 }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)

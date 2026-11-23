@@ -104,6 +104,9 @@ void iwdg_init(void)
   */
 static uint32_t GetLSIFrequency(void)
 {
+#ifdef RENODE_SIMULATION
+  return 32000U;
+#else
   TIM_IC_InitTypeDef    TIMInput_Config;
 
   RCC_OscInitTypeDef oscinit = {0};
@@ -170,6 +173,7 @@ static uint32_t GetLSIFrequency(void)
   HAL_TIM_IC_DeInit(&Input_Handle);
 
   return uwLsiFreq;
+#endif
 }
 
 /**

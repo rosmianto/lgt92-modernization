@@ -1,0 +1,4 @@
+using "platforms/cpus/stm32l072.repl"
+
+mpu9250: Mocks.DummyI2CSlave @ i2c1 0x68
+ak8963: Mocks.DummyI2CSlave @ i2c1 0x0C
