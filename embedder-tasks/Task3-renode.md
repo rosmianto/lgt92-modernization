@@ -1,0 +1,1 @@
+Now, let’s explore the possibility of simulating the firmware codebase using Renode. I’ve installed renode (check with renode -v), and let’s see your plan. What’s possible, what’s impossible, and what’s the blocker that prevents me from running the firmware via Renode

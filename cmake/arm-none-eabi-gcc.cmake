@@ -1,0 +1,15 @@
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+find_program(ARM_NONE_EABI_GCC arm-none-eabi-gcc REQUIRED)
+find_program(ARM_NONE_EABI_OBJCOPY arm-none-eabi-objcopy REQUIRED)
+
+set(CMAKE_C_COMPILER "${ARM_NONE_EABI_GCC}" CACHE FILEPATH "Arm GNU C compiler" FORCE)
+set(CMAKE_ASM_COMPILER "${ARM_NONE_EABI_GCC}" CACHE FILEPATH "Arm GNU assembler driver" FORCE)
+set(CMAKE_OBJCOPY "${ARM_NONE_EABI_OBJCOPY}" CACHE FILEPATH "Arm GNU objcopy" FORCE)
+
+set(CMAKE_C_FLAGS_INIT "-mcpu=cortex-m0plus -mthumb -Os -ffunction-sections")
+set(CMAKE_ASM_FLAGS_INIT "-mcpu=cortex-m0plus -mthumb")
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
