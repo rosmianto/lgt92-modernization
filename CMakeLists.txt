@@ -86,7 +86,6 @@ target_include_directories(lgt92 PRIVATE
     "${HAL_DIR}/Inc"
     "${CMSIS_DEVICE_DIR}/Include"
     "${PROJECT_SOURCE_DIR}/Drivers/CMSIS/Include"
-    "${BSP_COMPONENTS_DIR}/Common"
     "${BSP_COMPONENTS_DIR}/sx1276"
     "${PROJECT_SOURCE_DIR}/Drivers/BSP/sx1276mb1las"
     "${BSP_COMPONENTS_DIR}/flash_eraseprogram"
