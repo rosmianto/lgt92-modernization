@@ -1,1 +1,3 @@
 Now, let’s explore the possibility of simulating the firmware codebase using Renode. I’ve installed renode (check with renode -v), and let’s see your plan. What’s possible, what’s impossible, and what’s the blocker that prevents me from running the firmware via Renode
+
+My goal is to be able to run the firmware binary with Renode, and interact with it via AT command. So when I input "AT" to the lpuart, it should respond with "OK".
