@@ -34,3 +34,7 @@ cmake --build build/lgt92
 ```
 
 The build does not flash a device. The shared LoRaWAN sources remain in `Middlewares/Third_Party/Lora`; this firmware target compiles the EU868 region implementation.
+
+## Note from me
+
+The .embedder folder only contains metadata and poses no security risk (unlike credentials or API keys). I included it in this commit so you can inspect the artifacts Embedder generated, though in production projects, folders like this should be excluded via .gitignore.
